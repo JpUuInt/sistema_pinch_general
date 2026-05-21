@@ -1,0 +1,18 @@
+SISTEMA PINCH - PAQUETE MOBILE CON BARRA INFERIOR
+
+Cambios incluidos:
+1. Inicio mobile tipo app con barra inferior.
+2. Campo y Tecnico abren como paginas completas, no dentro de un panel lateral.
+3. Barra inferior fija en Inicio, Campo y Tecnico.
+4. index.html listo para Netlify.
+5. manifest.json y service-worker.js corregidos para instalar en celular.
+6. Incluye CODE_PINCH_corregido.gs.
+
+Pasos para subir a Netlify:
+1. Abra config_sistema_pinch.js y coloque su URL real de Apps Script.
+2. Suba todos los archivos de esta carpeta a Netlify.
+3. Abra la URL publicada en Chrome del celular.
+4. Elimine la app vieja instalada si existia.
+5. Instale nuevamente desde Chrome: Agregar a pantalla de inicio / Instalar app.
+
+Archivo principal: index.html

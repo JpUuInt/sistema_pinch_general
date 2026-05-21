@@ -1,0 +1,16 @@
+{
+  "name": "Sistema Pinch Mobile",
+  "short_name": "Pinch",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#edf4f8",
+  "theme_color": "#0f2a44",
+  "lang": "es",
+  "description": "Sistema Pinch para Campo y Técnico con navegación móvil.",
+  "icons": [
+    {"src":"./icon-192.png","sizes":"192x192","type":"image/png"},
+    {"src":"./icon-512.png","sizes":"512x512","type":"image/png"}
+  ]
+}
