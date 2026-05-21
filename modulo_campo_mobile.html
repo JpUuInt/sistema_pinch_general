@@ -1,0 +1,2319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Módulo 1 - Planificación Pinch</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f2a44">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Sistema Pinch">
+<link rel="apple-touch-icon" href="icon-192.png">
+<script src="config_sistema_pinch.js"></script>
+
+<style>
+:root{
+  --bg:#f3f5f7;
+  --card:#ffffff;
+  --primary:#184e77;
+  --primary-soft:#edf4fb;
+  --text:#1f2937;
+  --muted:#4b5563;
+  --border:#d7dde5;
+  --green:#dcfce7;
+  --yellow:#fef3c7;
+  --red:#fee2e2;
+  --accent:#184e77;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+
+/* ===== HEADER ===== */
+header{
+  position:sticky;
+  top:0;
+  z-index:300;
+  background:linear-gradient(180deg,#ffffff,#f8fafc);
+  border-bottom:1px solid var(--border);
+  padding:12px 16px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.title{
+  font-size:18px;
+  font-weight:700;
+  color:var(--accent);
+}
+
+/* ===== CONTROLES ===== */
+.controls{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+label{
+  font-size:11px;
+  color:var(--muted);
+}
+
+select,input[type=file]{
+  padding:8px 10px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:white;
+  font-size:13px;
+}
+
+/* ===== BOTONES ===== */
+.btn{
+  background:var(--primary);
+  color:white;
+  border:none;
+  padding:8px 12px;
+  border-radius:12px;
+  cursor:pointer;
+  font-weight:600;
+  box-shadow:0 2px 4px rgba(0,0,0,.08);
+}
+
+.btn:hover{opacity:.92}
+
+.btn.secondary{
+  background:white;
+  color:var(--primary);
+  border:1px solid var(--border);
+}
+
+.btn.danger{
+  background:#dc2626;
+}
+
+/* ===== CARD ===== */
+main{
+  max-width:1600px;
+  margin:14px auto;
+  padding:0 14px;
+}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:10px;
+  box-shadow:0 10px 30px rgba(15,23,42,.08);
+}
+
+/* ===== TABLE ===== */
+.table-wrap{
+  overflow:auto;
+  border-radius:12px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:1400px;
+}
+
+thead th{
+  position:sticky;
+  top:0;
+  background:var(--primary-soft);
+  color:var(--accent);
+  font-weight:700;
+  border-bottom:2px solid var(--border);
+  font-size:12px;
+  padding:8px;
+  text-align:center;
+  z-index:200;
+}
+
+th,td{
+  border:1px solid var(--border);
+  padding:6px 8px;
+  font-size:12px;
+  text-align:center;
+  white-space:nowrap;
+}
+
+tbody tr:nth-child(even){
+  background:#f9fafb;
+}
+
+tbody tr:hover{
+  background:#eef2ff;
+}
+
+/* ===== INPUTS ===== */
+input[type=number]{
+  width:80px;
+  padding:6px;
+  border-radius:6px;
+  border:1px solid var(--border);
+  text-align:right;
+}
+
+/* ===== COLUMNAS FIJAS ===== */
+.col-supervisor{
+  background:white;
+  z-index:220;
+  text-align:left;
+}
+
+.col-bloque{
+  position:sticky;
+  left:0;
+  background:white;
+  z-index:219;
+}
+
+.col-variedad{
+  position:sticky;
+  left:61px;
+  background:white;
+  z-index:218;
+  text-align:left;
+}
+
+/* ===== CUMPLIMIENTO ===== */
+.cum-green{
+  background:var(--green);
+  color:#065f46;
+  font-weight:700;
+}
+
+.cum-yellow{
+  background:var(--yellow);
+  color:#92400e;
+  font-weight:700;
+}
+
+.cum-red{
+  background:var(--red);
+  color:#991b1b;
+  font-weight:700;
+}
+
+/* ===== TOTALES ===== */
+.total-cell{
+  background:#eef2ff;
+  font-weight:700;
+}
+
+tfoot td{
+  background:#e0e7ff;
+  font-weight:800;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width:900px){
+  header{flex-direction:column;align-items:flex-start}
+}
+/* ===== Columnas Semana Anterior ===== */
+
+.header-semana-ant {
+  background: linear-gradient(135deg, #6c757d, #495057);
+  color: white;
+  font-weight: bold;
+  text-align: center;
+}
+
+.col-semana-ant {
+  background-color: #eef1f4;
+  color: #2c3e50;
+  font-weight: 600;
+  border-left: 3px solid #6c757d;
+}
+
+/* === Mejora visual profesional + modo campo/técnico === */
+header{
+  background:linear-gradient(135deg,#184e77,#2f6ea1);
+  border-bottom:none;
+  box-shadow:0 10px 24px rgba(15,23,42,.12);
+}
+.title{color:#fff}
+body.mode-campo .base-tech{display:none !important;}
+.mode-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:8px 12px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+  background:#eaf2fb;
+  color:#184e77;
+  border:1px solid #cfe0f1;
+}
+.card{
+  box-shadow:0 14px 34px rgba(15,23,42,.08);
+}
+thead th{
+  background:#eaf2fb;
+}
+thead tr:first-child th{
+  background:#dbe9f7;
+}
+.btn{
+  border-radius:12px;
+}
+
+
+/* ===== DISEÑO PROFESIONAL MÓDULO 1 ===== */
+:root{
+  --bg:#f4f7fb;
+  --card:#ffffff;
+  --ink:#1f2937;
+  --muted:#607086;
+  --line:#d9e2ec;
+  --brand:#184E77;
+  --brand2:#2A6F97;
+  --soft:#EAF2FB;
+  --soft2:#DCE8F6;
+  --shadow:0 12px 28px rgba(15,23,42,.08);
+}
+
+body{
+  background:var(--bg) !important;
+  color:var(--ink) !important;
+}
+
+header{
+  background:linear-gradient(135deg,var(--brand),var(--brand2)) !important;
+  border-bottom:none !important;
+  box-shadow:0 10px 24px rgba(15,23,42,.12);
+  padding:16px 18px !important;
+}
+
+.title,.header-title,h1{
+  color:#fff !important;
+  letter-spacing:.2px;
+}
+
+main{
+  max-width:1700px !important;
+}
+
+.card,.panel,.box,.table-container,.controls,.summary{
+  background:var(--card) !important;
+  border-radius:16px !important;
+  box-shadow:var(--shadow) !important;
+  border:1px solid #edf2f7 !important;
+}
+
+.btn{
+  background:var(--brand) !important;
+  color:#fff !important;
+  border:none !important;
+  border-radius:12px !important;
+  padding:9px 14px !important;
+  font-weight:700 !important;
+  box-shadow:0 8px 20px rgba(24,78,119,.16);
+}
+.btn:hover{
+  filter:brightness(.96);
+}
+.btn.secondary{
+  background:#fff !important;
+  color:var(--brand) !important;
+  border:1px solid #cfe0f1 !important;
+  box-shadow:none !important;
+}
+.btn.danger{
+  background:#c62828 !important;
+}
+
+select,input[type=file],input[type=number]{
+  border-radius:10px !important;
+  border:1px solid #cfd8e3 !important;
+  background:#fff !important;
+}
+select:focus,input[type=file]:focus,input[type=number]:focus{
+  outline:none !important;
+  border-color:#7fb3d5 !important;
+  box-shadow:0 0 0 3px rgba(70,143,175,.16) !important;
+}
+
+thead th{
+  background:var(--soft) !important;
+  color:#163a5d !important;
+  font-weight:700 !important;
+  border-bottom:1px solid #d7e6f4 !important;
+}
+thead tr:first-child th{
+  background:var(--soft2) !important;
+}
+tfoot td, tfoot th{
+  background:var(--soft2) !important;
+  color:#163a5d !important;
+  font-weight:800 !important;
+}
+tbody tr:nth-child(even){
+  background:#fbfdff !important;
+}
+tbody tr:hover{
+  background:#F3F8FF !important;
+}
+
+.col-supervisor,.col-bloque,.col-variedad{
+  background:#fff !important;
+}
+
+#modeChip{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:8px 12px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+  background:#E6F4EA;
+  color:#2E7D32;
+  border:1px solid #cfe8d4;
+}
+body:not(.mode-campo) #modeChip{
+  background:#E3F2FD;
+  color:#1565C0;
+  border-color:#c7defa;
+}
+
+
+#apiUrl{min-width:320px}
+body.mode-campo .solo-tecnico{display:none!important}
+
+
+/* ===== PANEL UNICO COMPACTO CAMPO ===== */
+.toolbar-top{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.header-note{max-width:1700px;margin:0 auto;padding:0 18px 14px;color:#f5fbff;font-size:14px}
+.config-panel{margin-top:10px;width:min(100%,1040px);background:rgba(255,255,255,.12)!important;border:1px solid rgba(255,255,255,.24)!important;border-radius:18px;padding:0;overflow:hidden;box-shadow:none!important}
+.config-panel summary{list-style:none;cursor:pointer;color:#fff;font-size:16px;font-weight:800;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 18px}
+.config-panel summary::-webkit-details-marker{display:none}
+.config-panel summary .summary-left{display:flex;align-items:center;gap:10px;min-width:0}
+.config-panel summary .summary-meta{font-size:12px;font-weight:600;opacity:.92;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.config-panel summary .summary-icon{transition:transform .2s ease;font-size:14px}
+.config-panel[open] summary .summary-icon{transform:rotate(180deg)}
+.config-panel-body{padding:4px 18px 18px;border-top:1px solid rgba(255,255,255,.14)}
+.compact-grid{display:grid;grid-template-columns:repeat(3,minmax(180px,1fr));gap:10px;margin-top:12px}
+.compact-grid label{display:flex;flex-direction:column;gap:4px;color:#eef7ff;font-size:12px;font-weight:600}
+.compact-grid select,.compact-grid input[type=text]{padding:8px 10px;border-radius:10px;border:1px solid #cfd8e3;background:#fff;color:#163a5d;font-size:13px;width:100%}
+.panel-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.panel-actions .btn,.panel-actions #modeChip{white-space:nowrap}
+.panel-hint{display:block;color:#eef7ff;font-size:12px;margin-top:10px;opacity:.95}
+@media (max-width: 820px){
+  header{padding:12px 12px 10px !important}
+  .toolbar-top{align-items:flex-start}
+  .config-panel{margin-top:8px;border-radius:16px}
+  .config-panel summary{padding:12px 14px;font-size:14px}
+  .config-panel summary .summary-meta{font-size:11px;max-width:48vw}
+  .config-panel-body{padding:2px 14px 14px}
+  .compact-grid{grid-template-columns:1fr;gap:8px}
+  .compact-grid label{font-size:11px}
+  .compact-grid select,.compact-grid input[type=text]{font-size:12px;padding:8px 9px}
+  .panel-actions{display:flex;overflow-x:auto;flex-wrap:nowrap;gap:8px;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+  .panel-actions .btn,.panel-actions #modeChip{flex:0 0 auto;padding:8px 10px !important;font-size:11px;border-radius:10px !important}
+  #modeChip{padding:8px 10px !important;font-size:11px}
+  .header-note{padding:0 12px 10px;font-size:12px}
+  input[type=number]{width:58px !important;padding:4px !important;font-size:11px !important}
+  th,td{padding:4px 5px;font-size:10.5px}
+  .title{font-size:15px}
+}
+@media (max-width: 480px){
+  .config-panel summary{font-size:13px}
+  .config-panel summary .summary-meta{max-width:40vw}
+  .panel-actions .btn,.panel-actions #modeChip{font-size:10.5px}
+  input[type=number]{width:54px !important}
+}
+
+
+/* ===== IDENTIDAD VISUAL UNIFICADA PINCH ===== */
+:root{
+  --bg:#f3f7fb !important;
+  --card:#ffffff !important;
+  --surface:#f8fbff !important;
+  --line:#d8e3ef !important;
+  --line-strong:#c8d7e6 !important;
+  --brand:#1f4e78 !important;
+  --brand-2:#2f6ea6 !important;
+  --brand-soft:#eaf2fb !important;
+  --text:#243b53 !important;
+  --muted:#6b7c93 !important;
+  --ok:#1f9d55 !important;
+  --warn:#d9822b !important;
+  --bad:#d64545 !important;
+  --shadow-soft:0 10px 24px rgba(15,23,42,.08) !important;
+  --shadow-strong:0 16px 36px rgba(15,23,42,.10) !important;
+}
+
+html{scroll-behavior:smooth}
+body{
+  background:linear-gradient(180deg,#f7f9fc 0%, #eef4f9 100%) !important;
+  color:var(--text) !important;
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif !important;
+}
+header{
+  background:linear-gradient(135deg,var(--brand) 0%, var(--brand-2) 100%) !important;
+  color:#fff !important;
+  border-bottom:none !important;
+  box-shadow:var(--shadow-strong) !important;
+  padding:18px 18px 12px !important;
+}
+.title,.header-title,h1{
+  color:#fff !important;
+  font-size:clamp(20px,2vw,28px) !important;
+  font-weight:800 !important;
+  letter-spacing:-.02em !important;
+}
+main{
+  max-width:1680px !important;
+  padding:0 16px 20px !important;
+}
+.header-note{
+  max-width:1680px !important;
+  color:rgba(255,255,255,.92) !important;
+  font-size:13px !important;
+  padding:0 18px 14px !important;
+}
+.card,.panel,.box,.table-container,.summary{
+  background:var(--card) !important;
+  border:1px solid var(--line) !important;
+  border-radius:18px !important;
+  box-shadow:var(--shadow-soft) !important;
+}
+.card:first-of-type{
+  background:linear-gradient(180deg,#f9fbff 0%, #f3f8fd 100%) !important;
+}
+.config-panel{
+  background:rgba(255,255,255,.14) !important;
+  border:1px solid rgba(255,255,255,.24) !important;
+  border-radius:18px !important;
+}
+.config-panel summary{
+  color:#fff !important;
+  font-weight:800 !important;
+}
+.config-panel-body{
+  border-top:1px solid rgba(255,255,255,.16) !important;
+}
+.compact-grid label,
+label{
+  color:var(--muted) !important;
+  font-weight:600 !important;
+  font-size:12px !important;
+}
+.compact-grid label{
+  color:#eaf4ff !important;
+}
+select,input[type=file],input[type=text],input[type=number]{
+  background:#fff !important;
+  border:1px solid var(--line-strong) !important;
+  border-radius:12px !important;
+  color:var(--text) !important;
+  min-height:40px;
+}
+select:focus,input[type=file]:focus,input[type=text]:focus,input[type=number]:focus{
+  outline:none !important;
+  border-color:#8cb6d9 !important;
+  box-shadow:0 0 0 4px rgba(47,110,166,.14) !important;
+}
+.btn{
+  background:linear-gradient(135deg,var(--brand) 0%, var(--brand-2) 100%) !important;
+  color:#fff !important;
+  border:none !important;
+  border-radius:12px !important;
+  min-height:40px !important;
+  padding:10px 14px !important;
+  font-weight:800 !important;
+  letter-spacing:.01em !important;
+  box-shadow:0 10px 22px rgba(31,78,120,.18) !important;
+}
+.btn:hover{filter:brightness(.98)}
+.btn.secondary{
+  background:#fff !important;
+  color:var(--brand) !important;
+  border:1px solid var(--line-strong) !important;
+  box-shadow:none !important;
+}
+.btn.danger{
+  background:linear-gradient(135deg,#c94747 0%, #b93838 100%) !important;
+}
+#modeChip,.mode-chip{
+  background:#eaf7ef !important;
+  color:#1f7a4c !important;
+  border:1px solid #cfe7d8 !important;
+  border-radius:999px !important;
+  font-weight:800 !important;
+}
+.table-wrap{
+  border:1px solid var(--line) !important;
+  border-radius:18px !important;
+  background:#fff !important;
+}
+table{
+  background:#fff !important;
+}
+thead th{
+  background:#edf3f8 !important;
+  color:#334e68 !important;
+  border-color:#dde7f1 !important;
+  font-size:12px !important;
+}
+thead tr:first-child th{
+  background:#e3edf7 !important;
+}
+th,td{
+  border-color:#e6edf5 !important;
+  color:var(--text) !important;
+}
+tbody tr:nth-child(even){
+  background:#fbfdff !important;
+}
+tbody tr:hover{
+  background:#f3f8fd !important;
+}
+.col-supervisor,.col-bloque,.col-variedad{
+  background:#fff !important;
+}
+.total-cell,tfoot td,tfoot th{
+  background:#eef5fb !important;
+  color:#26435f !important;
+}
+.header-semana-ant{
+  background:linear-gradient(135deg,#5d7186 0%, #465a70 100%) !important;
+  color:#fff !important;
+}
+.col-semana-ant{
+  background:#f2f5f8 !important;
+  color:#2c3e50 !important;
+}
+.cum-green{
+  background:#e8fff1 !important;
+  color:var(--ok) !important;
+}
+.cum-yellow{
+  background:#fff4e8 !important;
+  color:var(--warn) !important;
+}
+.cum-red{
+  background:#ffeaea !important;
+  color:var(--bad) !important;
+}
+p[style*="616161"]{
+  color:var(--muted) !important;
+  background:#f8fbff;
+  border:1px solid #dce8f5;
+  padding:12px 14px;
+  border-radius:14px;
+}
+@media (max-width: 820px){
+  .card,.config-panel,.table-wrap{border-radius:16px !important;}
+  .btn{min-height:38px !important;padding:8px 12px !important;font-size:12px !important;}
+  th,td{font-size:10.5px !important;}
+  input[type=number]{min-height:32px !important;}
+}
+
+
+/* Mobile Pro Complete */
+.mobile-brandbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;margin:12px 0 14px;border-radius:18px;background:linear-gradient(135deg,#0f2a44,#1f4e78);color:#fff;box-shadow:0 14px 28px rgba(15,42,68,.16)}
+.mobile-brandbar .brand-left{display:flex;align-items:center;gap:12px;min-width:0}
+.mobile-brandbar img{width:44px;height:44px;border-radius:12px;background:#fff;padding:5px;box-shadow:0 8px 16px rgba(0,0,0,.14)}
+.mobile-brandbar strong{display:block;font-size:15px;letter-spacing:.02em}
+.mobile-brandbar span{display:block;font-size:12px;color:rgba(255,255,255,.82)}
+.mobile-pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+.mobile-config-note{margin:0 0 12px;padding:12px 14px;border-radius:16px;background:#f6fbff;border:1px solid #dce8f5;color:#486581;font-size:12px;line-height:1.5}
+.mobile-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.mobile-kpi{background:#fff;border:1px solid #d9e2ec;border-radius:16px;padding:12px;box-shadow:0 10px 24px rgba(15,23,42,.06)}
+.mobile-kpi b{display:block;font-size:22px;color:#0f2a44;line-height:1.1;margin-top:6px}
+.mobile-kpi span{font-size:11px;color:#607086;text-transform:uppercase;letter-spacing:.04em;font-weight:800}
+.mobile-kpi small{display:block;font-size:11px;color:#6b7c93;margin-top:4px;line-height:1.35}
+@media (max-width: 760px){
+  .mobile-kpis{grid-template-columns:1fr}
+  .mobile-brandbar{position:sticky;top:8px;z-index:450}
+}
+
+
+/* ===== Barra inferior tipo app Sistema Pinch ===== */
+body{padding-bottom:88px!important;}
+.sp-bottom-nav{
+  position:fixed;left:12px;right:12px;bottom:12px;z-index:99999;
+  display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+  padding:9px;border-radius:24px;
+  background:rgba(15,42,68,.94);
+  border:1px solid rgba(255,255,255,.18);
+  box-shadow:0 16px 40px rgba(15,42,68,.28);
+  backdrop-filter:blur(14px);
+}
+.sp-bottom-nav a{
+  text-decoration:none;color:rgba(255,255,255,.82);
+  border-radius:18px;padding:9px 6px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  font-size:11px;font-weight:800;letter-spacing:.01em;
+  min-height:54px;
+}
+.sp-bottom-nav a .ico{font-size:18px;line-height:1}
+.sp-bottom-nav a.active{background:#fff;color:#0f2a44;box-shadow:0 8px 18px rgba(0,0,0,.18);}
+.sp-bottom-nav a:active{transform:scale(.98)}
+@media (min-width:900px){
+  body{padding-bottom:98px!important;}
+  .sp-bottom-nav{left:50%;right:auto;transform:translateX(-50%);width:min(560px,calc(100% - 32px));}
+}
+@media print{.sp-bottom-nav{display:none!important}body{padding-bottom:0!important}}
+
+
+/* FULLSCREEN_MODULE_FIX_V2 */
+html,body{width:100%;max-width:100%;overflow-x:hidden;}
+main,.wrap,.app,.container{max-width:100%!important;}
+.table-wrap{max-width:100%!important;}
+</style>
+</head>
+<body>
+
+<div class="mobile-brandbar">
+  <div class="brand-left">
+    <img src="sistema_pinch_logo.svg" alt="Sistema Pinch">
+    <div><strong>Sistema Pinch · Campo</strong><span>Versión móvil para trabajo en campo</span></div>
+  </div>
+  <div class="mobile-pill">Campo</div>
+</div>
+<p id="mobileConfigNote" class="mobile-config-note"></p>
+<div class="mobile-kpis">
+
+</div>
+
+
+<header>
+  <div class="toolbar-top">
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;width:100%">
+      <h1 class="title">Sistema Pinch · Módulo Campo</h1>
+
+      <details class="config-panel">
+        <summary>
+          <span class="summary-left">
+            <span>⚙️ Configuración y filtros</span>
+            <span class="summary-meta">Semana, supervisor, URL y acciones</span>
+          </span>
+          <span class="summary-icon">▼</span>
+        </summary>
+
+        <div class="config-panel-body">
+          <div class="compact-grid">
+            <label>Semana
+              <select id="semana"></select>
+            </label>
+            <label>Supervisor
+              <select id="supervisor"><option value="">-- Todos --</option></select>
+            </label>
+            <label>URL Apps Script
+              <input id="apiUrl" type="text" placeholder="https://script.google.com/macros/s/.../exec" />
+            </label>
+          </div>
+
+          <div class="panel-actions">
+            <button id="btnActualizar" class="btn secondary">Actualizar</button>
+            <span id="modeChip" class="mode-chip">🌿 Modo Campo</span>
+            <button id="habilitarCosecha" class="btn">Habilitar edición</button>
+            <button id="btnGuardar" class="btn secondary">Guardar</button>
+            <button id="btnResyncSemana" class="btn secondary">Resincronizar semana</button>
+            <button id="btnResyncRango" class="btn secondary">Resincronizar rango</button>
+            <button id="btnExportSemana" class="btn">Exportar Semana</button>
+            <button id="btnBorrarSemana" class="btn danger">🗑️ Borrar Semana</button>
+            <button id="btnResetTodo" class="btn danger">♻️ Resetear todo</button>
+          </div>
+
+          <div class="panel-hint">Este panel queda cerrado por defecto para dejar más espacio a la tabla cuando trabaje desde el celular.</div>
+        </div>
+      </details>
+    </div>
+  </div>
+
+<div class="header-note"></div></header>
+
+<main>
+  <div class="card" style="margin-bottom:12px;padding:14px 16px;background:#f7fbff;border-color:#dbe7f1"><strong>BIENVENIDOS</strong></div>
+  <div class="card">
+    <div class="table-wrap">
+      <table id="tabla">
+        <thead id="thead"></thead>
+        <tbody id="tbody"></tbody>
+        <tfoot id="tfoot"></tfoot>
+      </table>
+    </div>
+
+    <p style="color:#616161;margin-top:8px">
+      Cumplimiento diario = (Cosecha + Pinch Ejecutado) / Tallos/Día ×100. Rangos: ✅ 93–107% · ⚠️ 90–92% o 108–110% · ❌ &lt;90% o &gt;110%
+    </p>
+  </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+
+<script>
+/* =========================
+   Datos y estructura
+   ========================= */
+const STORAGE_KEY = 'planificacion_pinch';
+const API_STORAGE_KEY = 'mod1_gsheets_api_url';
+let API_URL = (window.SYSTEM_PINCH_CONFIG && window.SYSTEM_PINCH_CONFIG.API_URL && window.SYSTEM_PINCH_CONFIG.API_URL !== 'PEGUE_AQUI_SU_URL_DE_APPS_SCRIPT') ? window.SYSTEM_PINCH_CONFIG.API_URL : (localStorage.getItem(API_STORAGE_KEY) || '');
+
+const dias = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
+const diasFinDeSemana = new Set(["Sábado","Domingo"]);
+function esFinDeSemana(dia){ return diasFinDeSemana.has(dia); }
+function subcolumnasDia(dia){
+  return esFinDeSemana(dia)
+    ? ['Cosecha Diaria','Pinch x Cama','Pinch x Día','Cumplimiento %']
+    : ['Cosecha Diaria','Pinch x Cama','Pinch x Día','Pinch Ejec.','Cumplimiento %'];
+}
+
+let datosBase = []; // cada fila: [supervisor,bloque,variedad,nCamas,planta,indiceExp,pctCiego,pctNacional,indPoda,tallosMes,tallosSem,tallosDia,tallosCama,sabado]
+let weekData = {_propagations:{}};
+// weekData[sem][rowId] = { base: [...], days:[{cosecha,pinchEj,pinchCama,pinchDia,cum}], totals:{...} }
+let editMode = false;
+let detallesVisible = true;
+let modoCampo = true;
+let lastSemanaSeleccionada = null;
+let primeraCargaCompleta = false;
+
+/* ---------- helpers ---------- */
+function parsePct(val){
+  if(val===null||val===undefined) return 0;
+  if(typeof val === 'number') return val>1?val/100:val;
+  const s = String(val).replace('%','').trim();
+  const n = Number(s);
+  if(isNaN(n)) return 0;
+  return n>1? n/100 : n;
+}
+function debounce(fn,ms=200){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); }; }
+
+/* ---------- almacenamiento / API ---------- */
+function saveToStorage(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify({datosBase,weekData})); }catch(e){console.warn('save error',e);} }
+function loadFromStorage(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return;
+    const parsed = JSON.parse(raw);
+    if(parsed.datosBase) datosBase = parsed.datosBase;
+    if(parsed.weekData) weekData = parsed.weekData;
+  } catch(e){ console.warn('load error', e); }
+}
+async function fetchJson(url, options){
+  const res = await fetch(url, options);
+  return await res.json();
+}
+function setApiUrlFromInput(){
+  const el = document.getElementById('apiUrl');
+  const fixedApi = window.SYSTEM_PINCH_CONFIG && window.SYSTEM_PINCH_CONFIG.API_URL && window.SYSTEM_PINCH_CONFIG.API_URL !== 'PEGUE_AQUI_SU_URL_DE_APPS_SCRIPT' ? window.SYSTEM_PINCH_CONFIG.API_URL : '';
+  if(fixedApi){ API_URL = fixedApi; if(el) el.value = fixedApi; localStorage.setItem(API_STORAGE_KEY, API_URL); return; }
+  if(!el) return;
+  API_URL = (el.value || '').trim();
+  localStorage.setItem(API_STORAGE_KEY, API_URL);
+}
+function mapBaseObjToRow(r){
+  if(Array.isArray(r)){
+    const first = String(r[0] || '').trim().toLowerCase();
+    if(first === 'supervisor') return null;
+    return [
+      String(r[0] || ''),
+      r[1] ?? '',
+      String(r[2] || ''),
+      Number(r[3] || 0),
+      Number(r[4] || 0),
+      Number(r[5] || 0),
+      String(r[6] || ''),
+      String(r[7] || ''),
+      Number(r[8] || 0),
+      Number(r[9] || 0),
+      Number(r[10] || 0),
+      Number(r[11] || 0),
+      Number(r[12] || 0)
+    ];
+  }
+  if(!r || typeof r !== 'object') return null;
+  return [
+    String(r.Supervisor || r.supervisor || ''),
+    r.Bloque ?? r.bloque ?? '',
+    String(r.Variedad || r.variedad || ''),
+    Number(r.N_Camas || r.n_camas || r.Camas || r.camas || 0),
+    Number(r.Planta || r.planta || r.Plantas || r.plantas || 0),
+    Number(r.Indice_Exp || r.indice_exp || 0),
+    String(r.Porc_Ciego || r.porc_ciego || ''),
+    String(r.Porc_Nacional || r.porc_nacional || ''),
+    Number(r.Ind_Poda || r.ind_poda || 0),
+    Number(r.Tallos_Mes || r.tallos_mes || 0),
+    Number(r['TALLOS/SEM'] || r.Tallos_Sem || r.tallos_sem || 0),
+    Number(r.Tallos_Dia || r.tallos_dia || 0),
+    Number(r.Tallos_Cama || r.tallos_cama || 0)
+  ];
+}
+function normalizeProdRow(prod){
+  if(Array.isArray(prod)){
+    if(prod.length >= 37){
+      return {
+        Semana: prod[0], Supervisor: prod[1], Bloque: prod[2], Variedad: prod[3],
+        Camas: prod[4], Plantas: prod[5], Indice_Exp: prod[6], Porc_Ciego: prod[7], Porc_Nacional: prod[8],
+        'TALLOS/SEM': prod[9],
+        Sab_Pinch: prod[10], Dom_Pinch: prod[11], Sab_Cosecha: prod[12], Dom_Cosecha: prod[13],
+        Lun_Cosecha: prod[14], Lun_Pinch: prod[15], Mar_Cosecha: prod[16], Mar_Pinch: prod[17],
+        Mie_Cosecha: prod[18], Mie_Pinch: prod[19], Jue_Cosecha: prod[20], Jue_Pinch: prod[21],
+        Vie_Cosecha: prod[22], Vie_Pinch: prod[23],
+        TotalCosecha: prod[24], TotalPinch: prod[25], TotalProduccion: prod[26], Cumplimiento: prod[27], Diferencia: prod[28],
+        Cumpl_Sab: prod[29], Cumpl_Dom: prod[30], Cumpl_Lun: prod[31], Cumpl_Mar: prod[32], Cumpl_Mie: prod[33], Cumpl_Jue: prod[34], Cumpl_Vie: prod[35],
+        Ajuste_Recibido: prod[36]
+      };
+    }
+    if(prod.length >= 12){
+      return {
+        Semana: prod[0], Supervisor: prod[1], Bloque: prod[2], Variedad: prod[3],
+        Camas: prod[4], Plantas: prod[5], 'TALLOS/SEM': prod[6],
+        TotalCosecha: prod[7], TotalPinch: prod[8], TotalProduccion: prod[9], Cumplimiento: prod[10], Diferencia: prod[11]
+      };
+    }
+  }
+  return prod || {};
+}
+function rowIdForBaseRow(fila, idx){
+  return `${fila[0]}|${fila[1]}|${fila[2]}|${idx}`;
+}
+function findRowIdByProd(prod){
+  const sup = String(prod.Supervisor || '');
+  const blo = String(prod.Bloque || '');
+  const varr = String(prod.Variedad || '');
+  let found = null;
+  datosBase.forEach((fila, idx)=>{
+    if(found) return;
+    if(String(fila[0])===sup && String(fila[1])===blo && String(fila[2])===varr){
+      found = rowIdForBaseRow(fila, idx);
+    }
+  });
+  return found;
+}
+
+function normalizeBaseRowsForCompare(rows){
+  return (Array.isArray(rows) ? rows : [])
+    .map(r => [String(r[0]||'').trim(), String(r[1]||'').trim(), String(r[2]||'').trim(), Number(r[3]||0), Number(r[4]||0), Number(r[5]||0), String(r[6]||'').trim(), String(r[7]||'').trim()])
+    .sort((a,b)=> (a[0]+'|'+a[1]+'|'+a[2]).localeCompare(b[0]+'|'+b[1]+'|'+b[2]));
+}
+function baseRowsChanged(a,b){
+  return JSON.stringify(normalizeBaseRowsForCompare(a)) !== JSON.stringify(normalizeBaseRowsForCompare(b));
+}
+
+function limpiarSemanasDesde(semana){
+  const s = Number(semana || 1);
+  Object.keys(weekData || {}).forEach(k => {
+    if(k === '_propagations') return;
+    if(!isNaN(Number(k)) && Number(k) >= s){
+      delete weekData[k];
+    }
+  });
+}
+
+function buildRowsFromBase(baseRows){
+  const obj = {};
+  (Array.isArray(baseRows) ? baseRows : []).forEach((fila, idx) => {
+    const base = [...fila];
+    while (base.length < 13) base.push(0);
+
+    const rowId = `${fila[0]}|${fila[1]}|${fila[2]}|${idx}`;
+    obj[rowId] = {
+      base,
+      days: dias.map(() => ({
+        cosecha: 0,
+        pinchCama: 0,
+        pinchDia: 0,
+        pinchEj: 0,
+        cum: 0,
+        saldo: 0
+      })),
+      totals: {
+        totalC: 0,
+        totalPE: 0,
+        totalProd: 0,
+        cumpleSem: 0,
+        diff: 0,
+        ajusteRecibido: 0
+      },
+      pinchSabadoAnt: 0,
+      pinchDomingoAnt: 0
+    };
+  });
+  return obj;
+}
+
+
+function showUpdateMessage(text, type='success'){
+  let el = document.getElementById('updateMsg');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'updateMsg';
+    el.style.margin = '10px 0 0';
+    el.style.padding = '10px 12px';
+    el.style.borderRadius = '12px';
+    el.style.fontWeight = '700';
+    el.style.fontSize = '13px';
+
+    const target = document.querySelector('.header-note');
+    if(target && target.parentNode){
+      target.parentNode.insertBefore(el, target.nextSibling);
+    } else {
+      document.body.prepend(el);
+    }
+  }
+
+  const map = {
+    success: { bg:'#e8fff1', color:'#14532d', border:'#b7ebc6' },
+    warning: { bg:'#fff8e8', color:'#92400e', border:'#f3d19c' },
+    info:    { bg:'#eef6ff', color:'#184e77', border:'#bfd7f2' },
+    danger:  { bg:'#ffecec', color:'#991b1b', border:'#f1b8b8' }
+  };
+
+  const cfg = map[type] || map.success;
+  el.style.display = 'block';
+  el.style.background = cfg.bg;
+  el.style.color = cfg.color;
+  el.style.border = `1px solid ${cfg.border}`;
+  el.textContent = text;
+
+  clearTimeout(window.__msgTimer);
+  window.__msgTimer = setTimeout(() => {
+    el.style.display = 'none';
+  }, 3000);
+}
+async function guardarBaseVigenteDesdeSemana(semana, baseRows){
+  if(!API_URL) return {status:'skip'};
+  const rows = (Array.isArray(baseRows) ? baseRows : []).map(r => ({
+    Supervisor: r[0] || '',
+    Bloque: r[1] || '',
+    Variedad: r[2] || '',
+    N_Camas: Number(r[3] || 0),
+    Planta: Number(r[4] || 0),
+    Indice_Exp: Number(r[5] || 0),
+    Porc_Ciego: r[6] || '',
+    Porc_Nacional: r[7] || ''
+  }));
+  const res = await fetch(API_URL, {
+    method:'POST',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body: JSON.stringify({action:'save_base_snapshot', semana:Number(semana), rows})
+  });
+  try { return await res.json(); } catch(e){ return {status:'ok'}; }
+}
+
+async function cargarDesdeGoogleSheets(options = {}){
+  const {
+    origen = 'manual',
+    mostrarMensaje = false,
+    limpiarDesdeSemana = true
+  } = options;
+
+  setApiUrlFromInput();
+  if(!API_URL){
+    alert('Pega primero la URL de Apps Script');
+    return;
+  }
+
+  const sem = String(document.getElementById('semana').value || '1');
+  const prev = String(Math.max(1, Number(sem) - 1));
+
+  if(limpiarDesdeSemana){
+    limpiarSemanasDesde(sem);
+  }
+
+  const baseResActual = await fetchJson(API_URL + '?action=base');
+  const baseActual = (Array.isArray(baseResActual) ? baseResActual : [])
+    .map(mapBaseObjToRow)
+    .filter(Boolean);
+
+  const baseEfRes = await fetchJson(API_URL + '?action=base_efectiva&semana=' + encodeURIComponent(sem));
+  const baseEfectiva = (Array.isArray(baseEfRes) ? baseEfRes : [])
+    .map(mapBaseObjToRow)
+    .filter(Boolean);
+
+  const huboCambioBase = baseRowsChanged(baseActual, baseEfectiva);
+
+  if(huboCambioBase){
+    await guardarBaseVigenteDesdeSemana(sem, baseActual);
+    datosBase = baseActual;
+  } else {
+    datosBase = baseEfectiva.length ? baseEfectiva : baseActual;
+  }
+
+  llenarSupervisores();
+
+  const prevResRaw = Number(prev) >= 1
+    ? await fetchJson(API_URL + '?action=produccion&semana=' + encodeURIComponent(prev))
+    : [];
+  const semResRaw = await fetchJson(API_URL + '?action=produccion&semana=' + encodeURIComponent(sem));
+
+  const prevRes = (Array.isArray(prevResRaw) ? prevResRaw : []).map(normalizeProdRow);
+  const semRes = (Array.isArray(semResRaw) ? semResRaw : []).map(normalizeProdRow);
+
+  weekData[prev] = buildRowsFromBase(datosBase);
+  weekData[sem] = buildRowsFromBase(datosBase);
+
+  prevRes.forEach(prod => {
+    const rowId = findRowIdByProd(prod);
+    if(!rowId || !weekData[prev][rowId]) return;
+
+    const row = weekData[prev][rowId];
+
+    if(prod.Camas !== undefined) row.base[3] = Number(prod.Camas || 0);
+    if(prod.Plantas !== undefined) row.base[4] = Number(prod.Plantas || 0);
+    if(prod.Indice_Exp !== undefined) row.base[5] = Number(prod.Indice_Exp || 0);
+    if(prod.Porc_Ciego !== undefined) row.base[6] = String(prod.Porc_Ciego || '');
+    if(prod.Porc_Nacional !== undefined) row.base[7] = String(prod.Porc_Nacional || '');
+    if(prod['TALLOS/SEM'] !== undefined) row.base[10] = Number(prod['TALLOS/SEM'] || 0);
+
+    row.pinchSabadoAnt = Number(prod.Sab_Pinch || 0);
+    row.pinchDomingoAnt = Number(prod.Dom_Pinch || 0);
+
+    row.days[5].cosecha = Number(prod.Sab_Cosecha || 0);
+    row.days[6].cosecha = Number(prod.Dom_Cosecha || 0);
+    row.days[0].cosecha = Number(prod.Lun_Cosecha || 0); row.days[0].pinchEj = Number(prod.Lun_Pinch || 0);
+    row.days[1].cosecha = Number(prod.Mar_Cosecha || 0); row.days[1].pinchEj = Number(prod.Mar_Pinch || 0);
+    row.days[2].cosecha = Number(prod.Mie_Cosecha || 0); row.days[2].pinchEj = Number(prod.Mie_Pinch || 0);
+    row.days[3].cosecha = Number(prod.Jue_Cosecha || 0); row.days[3].pinchEj = Number(prod.Jue_Pinch || 0);
+    row.days[4].cosecha = Number(prod.Vie_Cosecha || 0); row.days[4].pinchEj = Number(prod.Vie_Pinch || 0);
+
+    row.totals.ajusteRecibido = Number(prod.Ajuste_Recibido || 0);
+
+    recalcRow(prev, rowId, null, false);
+  });
+
+  semRes.forEach(prod => {
+    const rowId = findRowIdByProd(prod);
+    if(!rowId || !weekData[sem][rowId]) return;
+
+    const row = weekData[sem][rowId];
+
+    if(prod.Camas !== undefined) row.base[3] = Number(prod.Camas || 0);
+    if(prod.Plantas !== undefined) row.base[4] = Number(prod.Plantas || 0);
+    if(prod.Indice_Exp !== undefined) row.base[5] = Number(prod.Indice_Exp || 0);
+    if(prod.Porc_Ciego !== undefined) row.base[6] = String(prod.Porc_Ciego || '');
+    if(prod.Porc_Nacional !== undefined) row.base[7] = String(prod.Porc_Nacional || '');
+    if(prod['TALLOS/SEM'] !== undefined) row.base[10] = Number(prod['TALLOS/SEM'] || 0);
+
+    row.pinchSabadoAnt = Number(prod.Sab_Pinch || 0);
+    row.pinchDomingoAnt = Number(prod.Dom_Pinch || 0);
+
+    row.days[5].cosecha = Number(prod.Sab_Cosecha || 0);
+    row.days[6].cosecha = Number(prod.Dom_Cosecha || 0);
+    row.days[0].cosecha = Number(prod.Lun_Cosecha || 0); row.days[0].pinchEj = Number(prod.Lun_Pinch || 0);
+    row.days[1].cosecha = Number(prod.Mar_Cosecha || 0); row.days[1].pinchEj = Number(prod.Mar_Pinch || 0);
+    row.days[2].cosecha = Number(prod.Mie_Cosecha || 0); row.days[2].pinchEj = Number(prod.Mie_Pinch || 0);
+    row.days[3].cosecha = Number(prod.Jue_Cosecha || 0); row.days[3].pinchEj = Number(prod.Jue_Pinch || 0);
+    row.days[4].cosecha = Number(prod.Vie_Cosecha || 0); row.days[4].pinchEj = Number(prod.Vie_Pinch || 0);
+
+    row.totals.ajusteRecibido = Number(prod.Ajuste_Recibido || 0);
+
+    recalcRow(sem, rowId, null, false);
+  });
+
+  const prevRows = weekData[prev] || {};
+  const currRows = weekData[sem] || {};
+
+  Object.keys(currRows).forEach(rowId => {
+    if(rowId === '_propagations') return;
+
+    const curr = currRows[rowId];
+    const prevRow = prevRows[rowId];
+    if(!curr) return;
+
+    // No copiar automáticamente pinch sábado/domingo al cambiar de semana.
+    // Si la semana no tiene datos guardados, estos campos deben quedar vacíos.
+    curr.pinchSabadoAnt = Number(curr.pinchSabadoAnt || 0);
+    curr.pinchDomingoAnt = Number(curr.pinchDomingoAnt || 0);
+
+    curr.totals = curr.totals || {};
+    if(prevRow && !Number(curr.totals.ajusteRecibido || 0)){
+      curr.totals.ajusteRecibido = Number(prevRow.totals?.diff || 0) < 0
+        ? Math.abs(Number(prevRow.totals?.diff || 0))
+        : 0;
+    }
+
+    recalcRow(sem, rowId, null, false);
+  });
+
+  saveToStorage();
+  if(typeof applyFiltersAndRender === 'function'){
+    applyFiltersAndRender();
+  } else {
+    renderTable();
+  }
+
+  const cambioDeSemana = lastSemanaSeleccionada !== null && lastSemanaSeleccionada !== sem;
+  lastSemanaSeleccionada = sem;
+
+  if(mostrarMensaje){
+    if(origen === 'manual'){
+      showUpdateMessage(
+        huboCambioBase
+          ? `✅ Base actualizada correctamente para la semana ${sem}`
+          : `✅ Información actualizada. No se detectaron cambios en BASE para la semana ${sem}`,
+        'success'
+      );
+    } else if(origen === 'semana' && cambioDeSemana && huboCambioBase){
+      showUpdateMessage(`✅ Se detectaron cambios al cambiar a la semana ${sem}`, 'info');
+    }
+  }
+
+  primeraCargaCompleta = true;
+}
+async function guardarSemanaEnGoogleSheets(semanaOverride = null){
+  setApiUrlFromInput();
+  if(!API_URL){ alert('Pega primero la URL de Apps Script'); return; }
+  const sem = String(semanaOverride || document.getElementById('semana').value || '1');
+  ensureWeekInitialized(sem);
+  const rows = [];
+  const wk = weekData[sem] || {};
+
+  Object.keys(wk).forEach(rid=>{
+    if(rid === '_propagations') return;
+    const row = wk[rid];
+    if(!row || !row.base) return;
+
+    rows.push({
+      Supervisor: row.base[0] || '',
+      Bloque: row.base[1] || '',
+      Variedad: row.base[2] || '',
+      Camas: Number(row.base[3] || 0),
+      Plantas: Number(row.base[4] || 0),
+      Indice_Exp: Number(row.base[5] || 0),
+      Porc_Ciego: row.base[6] || '',
+      Porc_Nacional: row.base[7] || '',
+      Ind_Poda: Number(row.base[8] || 0),
+      Tallos_Mes: Number(row.base[9] || 0),
+      'TALLOS/SEM': Number(row.base[10] || 0),
+      Tallos_Dia: Number(row.base[11] || 0),
+      Tallos_Cama: Number(row.base[12] || 0),
+
+      Sab_Pinch: Number(row.pinchSabadoAnt || 0),
+      Dom_Pinch: Number(row.pinchDomingoAnt || 0),
+      Sab_Cosecha: Number(row.days?.[5]?.cosecha || 0),
+      Dom_Cosecha: Number(row.days?.[6]?.cosecha || 0),
+
+      Lun_Cosecha: Number(row.days?.[0]?.cosecha || 0),
+      Lun_Pinch: Number(row.days?.[0]?.pinchEj || 0),
+      Mar_Cosecha: Number(row.days?.[1]?.cosecha || 0),
+      Mar_Pinch: Number(row.days?.[1]?.pinchEj || 0),
+      Mie_Cosecha: Number(row.days?.[2]?.cosecha || 0),
+      Mie_Pinch: Number(row.days?.[2]?.pinchEj || 0),
+      Jue_Cosecha: Number(row.days?.[3]?.cosecha || 0),
+      Jue_Pinch: Number(row.days?.[3]?.pinchEj || 0),
+      Vie_Cosecha: Number(row.days?.[4]?.cosecha || 0),
+      Vie_Pinch: Number(row.days?.[4]?.pinchEj || 0),
+
+      TotalCosecha: Number(row.totals?.totalC || 0),
+      TotalPinch: Number(row.totals?.totalPE || 0),
+      TotalProduccion: Number(row.totals?.totalProd || 0),
+      Cumplimiento: Number(row.totals?.cumpleSem || 0),
+      Diferencia: Number(row.totals?.diff || 0),
+
+      Cumpl_Sab: Number(row.days?.[5]?.cum || 0),
+      Cumpl_Dom: Number(row.days?.[6]?.cum || 0),
+      Cumpl_Lun: Number(row.days?.[0]?.cum || 0),
+      Cumpl_Mar: Number(row.days?.[1]?.cum || 0),
+      Cumpl_Mie: Number(row.days?.[2]?.cum || 0),
+      Cumpl_Jue: Number(row.days?.[3]?.cum || 0),
+      Cumpl_Vie: Number(row.days?.[4]?.cum || 0),
+      Ajuste_Recibido: Number(row.totals?.ajusteRecibido || 0)
+    });
+  });
+
+  const res = await fetch(API_URL, {
+    method:'POST',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body: JSON.stringify({action:'save_week', semana:Number(sem), rows})
+  });
+
+  try{
+    return await res.json();
+  }catch(e){
+    return {status:'ok'};
+  }
+}
+
+async function resincronizarSemanas(desde, hasta){
+  setApiUrlFromInput();
+  if(!API_URL){ alert('Pega primero la URL de Apps Script'); return; }
+
+  const semSel = document.getElementById('semana');
+  const original = String(semSel.value || '1');
+  const ini = Math.max(1, Math.min(52, Number(desde || original)));
+  const fin = Math.max(1, Math.min(52, Number(hasta || ini)));
+  const desdeFinal = Math.min(ini, fin);
+  const hastaFinal = Math.max(ini, fin);
+
+  let procesadas = 0;
+  showUpdateMessage(`⏳ Resincronizando semanas ${desdeFinal} a ${hastaFinal}...`, 'info');
+
+  for(let s = desdeFinal; s <= hastaFinal; s++){
+    semSel.value = String(s);
+    await cargarDesdeGoogleSheets({origen:'resync', mostrarMensaje:false, limpiarDesdeSemana:false});
+
+    const wk = weekData[String(s)] || {};
+    Object.keys(wk).forEach(rid => {
+      if(rid === '_propagations') return;
+      recalcRow(String(s), rid, null, false);
+    });
+
+    await guardarSemanaEnGoogleSheets(String(s));
+    procesadas++;
+  }
+
+  semSel.value = original;
+  await cargarDesdeGoogleSheets({origen:'resync', mostrarMensaje:false, limpiarDesdeSemana:false});
+  buildHeader();
+  renderTable();
+  saveToStorage();
+  showUpdateMessage(`✅ Resincronización completada: ${procesadas} semana(s) actualizadas`, 'success');
+}
+
+/* ---------- inicializar semana (lazy) ---------- */
+function ensureWeekInitialized(sem){
+
+  if(!sem) return;
+
+  if(!weekData[sem]){
+    weekData[sem] = {};
+  }
+
+  datosBase.forEach((fila, idx)=>{
+
+    const sup = fila[0];
+    const blo = fila[1];
+    const varr = fila[2];
+
+    const rowId = `${sup}|${blo}|${varr}|${idx}`;
+
+    if(!weekData[sem][rowId]){
+
+      const base = [...fila];
+
+      while(base.length < 13) base.push(0);
+
+      weekData[sem][rowId] = {
+        base: base,
+
+        days: dias.map(()=>({
+          cosecha: 0,
+          pinchCama: 0,
+          pinchDia: 0,
+          pinchEj: 0,
+          cum: 0,
+          saldo: 0
+        })),
+
+        totals: {
+          totalC: 0,
+          totalPE: 0,
+          totalProd: 0,
+          cumpleSem: 0,
+          diff: 0,
+          ajusteRecibido: 0
+        },
+
+        pinchSabadoAnt: 0,
+        pinchDomingoAnt: 0,
+        
+      };
+
+    }
+
+  });
+
+  if(!weekData._propagations){
+    weekData._propagations = {};
+  }
+}
+
+/* ---------- calcular índices redondeados ---------- */
+function calcularIndicesParaBase(base){
+  const nCamas = Math.round(Number(base[3])||0);
+  const planta = Math.round(Number(base[4])||0);
+  const indiceExp = Number(base[5]) || 0;
+  const pctCiego = parsePct(base[6]);
+  const pctNacional = parsePct(base[7]);
+
+  const denom = 1 - (pctCiego + pctNacional);
+  const indPoda = denom !== 0 ? indiceExp / denom : 0;
+  const tallosMes = indPoda * planta;
+  const tallosSem = tallosMes / 4.28;
+  const tallosDia = tallosSem / 7;
+  const tallosCama = nCamas !== 0 ? tallosDia / nCamas : 0;
+
+  base[8] = Math.round(indPoda);
+  base[9] = Math.round(tallosMes);
+  base[10] = Math.round(tallosSem);
+  base[11] = Math.round(tallosDia);
+  base[12] = Math.round(tallosCama);
+  
+}
+
+/* ---------- aplicar cálculos en todas las semanas (cuando importamos) ---------- */
+function aplicarCalculosTodasSemanas(){
+  for(let w=1; w<=52; w++){
+    const s=String(w);
+    ensureWeekInitialized(s);
+    const wk = weekData[s];
+    for(const rid in wk){
+      if(!wk[rid]) continue;
+      calcularIndicesParaBase(wk[rid].base);
+    }
+  }
+  saveToStorage();
+}
+
+/* ---------- importar Excel (file input) ---------- */
+document.getElementById('fileInput') && document.getElementById('fileInput').addEventListener('change', function(evt){
+  const file = evt.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    const data = new Uint8Array(e.target.result);
+    const wb = XLSX.read(data,{type:'array'});
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(sheet, {header:1});
+    if(rows.length<2){ alert('El archivo no contiene filas.'); return; }
+    // assume first row is header; map columns by position:
+    // 0:Supervisor,1:Bloque,2:Variedad,3:N Camas,4:Planta,5:Indice Exp,6:%Ciego,7:%Nacional
+    const dataRows = rows.slice(1).filter(r => r && r[0] !== undefined && r[0] !== '');
+    datosBase = dataRows.map(r => [
+      String(r[0]||''),
+      r[1]===undefined? '' : r[1],
+      String(r[2]||''),
+      Number(r[3]||0),
+      Number(r[4]||0),
+      Number(r[5]||0),
+      String(r[6]||''),
+      String(r[7]||''),
+      0,0,0,0,0
+    ]);
+    // set supervisor select
+    llenarSupervisores();
+    // initialize weekData for all weeks using new datosBase
+    for(let w=1; w<=52; w++) ensureWeekInitialized(String(w));
+    // apply calculated indices to all weeks
+    aplicarCalculosTodasSemanas();
+    renderTable();
+    alert('Datos importados correctamente.');
+  };
+  reader.readAsArrayBuffer(file);
+});
+
+/* ---------- llenar select supervisores ---------- */
+function llenarSupervisores(){
+  const supSet = Array.from(new Set(datosBase.map(r=>r[0]).filter(Boolean)));
+  const supSel = document.getElementById('supervisor');
+  supSel.innerHTML = '<option value="">-- Todos --</option>';
+  supSet.forEach(s => {
+    const opt = document.createElement('option'); opt.value = s; opt.textContent = s;
+    supSel.appendChild(opt);
+  });
+}
+
+/* ---------- header tabla (doble fila) ---------- */
+/* ---------- header tabla (doble fila) ---------- */
+function buildHeader(){
+
+  const thead = document.getElementById('thead');
+  thead.innerHTML = '';
+
+  const sem = document.getElementById('semana').value;
+  const semanaActual = Number(sem || 1 );
+  const semanaAnterior = semanaActual - 1;
+  const mostrarSemanaAnterior = semanaAnterior > 0;
+
+  const tr1 = document.createElement('tr');
+
+  const fixed = [
+    'SUPERVISOR','BLOQUE','VARIEDAD','N° CAMAS','PLANTA',
+    'INDICE EXP','% CIEGO','% NACIONAL',
+    'IND PODA','TALLOS/MES','TALLOS/SEM.','TALLOS/DÍA','TALLOS/CAMA'
+  ];
+
+  fixed.forEach((h,i)=>{
+    const th = document.createElement('th');
+    th.textContent = h;
+    th.rowSpan = 2;
+
+    if(i===0) th.classList.add('col-supervisor');
+    if(i===1) th.classList.add('col-bloque');
+    if(i===2) th.classList.add('col-variedad');
+    if(i>=3 && i<=9) th.classList.add('base-tech');
+
+    tr1.appendChild(th);
+  });
+
+  if(mostrarSemanaAnterior){
+
+    const thAjuste = document.createElement('th');
+    thAjuste.textContent = 'AJUSTE RECIBIDO (S/D)';
+    thAjuste.rowSpan = 2;
+    thAjuste.classList.add('header-semana-ant');
+    tr1.appendChild(thAjuste);
+
+    const thSemana = document.createElement('th');
+    thSemana.textContent = `Semana ${semanaAnterior}`;
+    thSemana.colSpan = 2;
+    thSemana.classList.add('header-semana-ant');
+    tr1.appendChild(thSemana);
+  }
+if(detallesVisible){
+  dias.forEach(d=>{
+    const th = document.createElement('th');
+    th.colSpan = subcolumnasDia(d).length;
+    th.textContent = d;
+    tr1.appendChild(th);
+  });
+}
+
+  [
+    'TOTAL COSECHA',
+    'TOTAL PINCH EJECUTADO',
+    'TOTAL COSECHA + PINCH',
+    'CUMPLIMIENTO %',
+    'DIFERENCIA'
+  ].forEach(h=>{
+    const th = document.createElement('th');
+    th.textContent = h;
+    th.rowSpan = 2;
+    tr1.appendChild(th);
+  });
+
+  const tr2 = document.createElement('tr');
+
+  if(mostrarSemanaAnterior){
+    ['Pinch Sábado','Pinch Domingo'].forEach(texto=>{
+      const th = document.createElement('th');
+      th.textContent = texto;
+      th.classList.add('header-semana-ant');
+      tr2.appendChild(th);
+    });
+  }
+
+  if(detallesVisible){
+  dias.forEach((dia)=>{
+    subcolumnasDia(dia).forEach(texto=>{
+      const th = document.createElement('th');
+      th.textContent = texto;
+      tr2.appendChild(th);
+    });
+  });
+}
+
+  thead.appendChild(tr1);
+  thead.appendChild(tr2);
+}
+
+/* ---------- render tabla (semana seleccionada y filtro supervisor) ---------- */
+function renderTable(){
+
+  
+
+  const tbody = document.getElementById('tbody'); 
+  tbody.innerHTML = '';
+  const tfoot = document.getElementById('tfoot'); tfoot.innerHTML = '';
+  const sem = document.getElementById('semana').value;
+  if(!sem) return;
+buildHeader();   // 🔥 ESTA LÍNEA ES LA CLAVE
+ const semanaActual = Number(sem || 1);
+const semanaAnterior = semanaActual - 1;
+const mostrarSemanaAnterior = semanaAnterior > 0;
+  if(datosBase.length===0){
+    tbody.innerHTML = '<tr><td colspan="999">No hay datos base. Importa un archivo Excel con las columnas: Supervisor, Bloque, Variedad, N° Camas, Planta, Índice Exp, % Ciego, % Nacional</td></tr>';
+    return;
+  }
+  ensureWeekInitialized(sem);
+  const weekObj = weekData[sem];
+  const supFilter = document.getElementById('supervisor').value.trim();
+  const frag = document.createDocumentFragment();
+
+  datosBase.forEach((baseFila, idx)=>{
+    const sup = baseFila[0], blo = baseFila[1], varr = baseFila[2];
+    if(supFilter && supFilter !== sup) return;
+    const rowId = `${sup}|${blo}|${varr}|${idx}`;
+    const stored = weekObj[rowId];
+    if(!stored) return;
+
+    // ensure base indices correct
+    calcularIndicesParaBase(stored.base);
+
+    const tr = document.createElement('tr');
+    tr.dataset.rowid = rowId;
+
+    // columnas fijas (base)
+    stored.base.forEach((v,i)=>{
+      const td = document.createElement('td');
+      td.textContent = (v !== undefined && v !== null) ? v : '';
+      if(i===0) td.classList.add('col-supervisor');
+      if(i===1) td.classList.add('col-bloque');
+      if(i===2) td.classList.add('col-variedad');
+      if(i>=3 && i<=9) td.classList.add('base-tech');
+      tr.appendChild(td);
+    });
+// ===== COLUMNAS SEMANA ANTERIOR =====
+if(mostrarSemanaAnterior){
+
+  // AJUSTE RECIBIDO
+  // ===== AJUSTE RECIBIDO (AUTOMÁTICO - NO EDITABLE) =====
+const tdAjuste = document.createElement('td');
+tdAjuste.className = 'ajuste-recibido';
+tdAjuste.textContent = stored.totals?.ajusteRecibido || 0;
+tr.appendChild(tdAjuste);
+
+  // PINCH SÁBADO
+  const tdSab = document.createElement('td');
+  const inpSab = document.createElement('input');
+  inpSab.type = 'number';
+  inpSab.min = 0;
+  inpSab.value = stored.pinchSabadoAnt || '';
+  inpSab.disabled = !editMode;
+  inpSab.dataset.type = 'sabadoAnt';
+  tdSab.appendChild(inpSab);
+  tr.appendChild(tdSab);
+
+  // PINCH DOMINGO
+  const tdDom = document.createElement('td');
+  const inpDom = document.createElement('input');
+  inpDom.type = 'number';
+  inpDom.min = 0;
+  inpDom.value = stored.pinchDomingoAnt || '';
+  inpDom.disabled = !editMode;
+  inpDom.dataset.type = 'domingoAnt';
+  tdDom.appendChild(inpDom);
+  tr.appendChild(tdDom);
+}
+    if(detallesVisible){
+
+for(let d=0; d<dias.length; d++){
+  const diaNombre = dias[d];
+
+  // Cosecha
+  const tdC = document.createElement('td');
+  const inpC = document.createElement('input');
+  inpC.type='number';
+  inpC.min = 0;
+  inpC.value = stored.days[d].cosecha || '';
+  inpC.disabled = !editMode;
+  inpC.dataset.type = 'cosecha';
+  inpC.dataset.day = d;
+  tdC.appendChild(inpC);
+  tr.appendChild(tdC);
+
+  // Pinch x cama
+  const tdPC = document.createElement('td');
+  tdPC.className='pinch-cama';
+  tr.appendChild(tdPC);
+
+  // Pinch x día
+  const tdPD = document.createElement('td');
+  tdPD.className='pinch-dia';
+  tr.appendChild(tdPD);
+
+  if(!esFinDeSemana(diaNombre)){
+    const tdPE = document.createElement('td');
+    const inpPE = document.createElement('input');
+    inpPE.type='number';
+    inpPE.min = 0;
+    inpPE.value = stored.days[d].pinchEj || '';
+    inpPE.disabled = !editMode;
+    inpPE.dataset.type = 'pinchEj';
+    inpPE.dataset.day = d;
+    tdPE.appendChild(inpPE);
+    tr.appendChild(tdPE);
+  }
+
+  const tdCum = document.createElement('td');
+  tdCum.className='cum-cell';
+  tdCum.textContent = stored.days[d].cum + ' %';
+  tr.appendChild(tdCum);
+}
+}
+
+    // Totales finales por fila (se llenan en recalcRow)
+    const tdTotC = document.createElement('td'); tdTotC.className='total-cosecha'; tdTotC.textContent=''; tr.appendChild(tdTotC);
+    const tdTotPE = document.createElement('td'); tdTotPE.className='total-pe'; tdTotPE.textContent=''; tr.appendChild(tdTotPE);
+    const tdTotProd = document.createElement('td'); tdTotProd.className='total-prod'; tdTotProd.textContent=''; tr.appendChild(tdTotProd);
+    const tdCumSem = document.createElement('td'); tdCumSem.className='cum-sem'; tdCumSem.textContent=''; tr.appendChild(tdCumSem);
+    const tdDiff = document.createElement('td'); tdDiff.className='diff'; tdDiff.textContent=''; tr.appendChild(tdDiff);
+    
+
+    frag.appendChild(tr);
+
+    // recalc row to populate calculated cells
+    recalcRow(sem, rowId, tr, false);
+  });
+
+  document.getElementById('tbody').appendChild(frag);
+
+  recalcTotals(sem);
+}
+
+/* ---------- eventos del tbody ---------- */
+function setupTbodyEvents(){
+  const tbody = document.getElementById('tbody');
+  if(!tbody || tbody.dataset.eventsBound === '1') return;
+
+  tbody.addEventListener('input', function(e){
+    const t = e.target;
+    if(!t.matches('input[data-type]')) return;
+
+    const row = t.closest('tr');
+    if(!row) return;
+
+    const rowId = row.dataset.rowid;
+    const sem = document.getElementById('semana').value;
+    if(!weekData[sem] || !weekData[sem][rowId]) return;
+
+    const type = t.dataset.type;
+    const value = Math.round(Number(t.value) || 0);
+
+    if(type === 'sabadoAnt') weekData[sem][rowId].pinchSabadoAnt = value;
+    else if(type === 'domingoAnt') weekData[sem][rowId].pinchDomingoAnt = value;
+    else {
+      const day = Number(t.dataset.day);
+      if(type === 'cosecha') weekData[sem][rowId].days[day].cosecha = value;
+      if(type === 'pinchEj') weekData[sem][rowId].days[day].pinchEj = value;
+    }
+
+    recalcRow(sem, rowId, row, false);
+    recalcTotals(sem);
+    saveToStorage();
+  });
+
+  tbody.dataset.eventsBound = '1';
+}
+
+/* ---------- recalcular fila y propagar diferencia ---------- */
+function recalcRow(semana, rowId, tr, saveAfter = true){
+  if(!weekData[semana] || !weekData[semana][rowId]) return;
+
+  const stored = weekData[semana][rowId];
+
+  // Recalcular índices base
+  calcularIndicesParaBase(stored.base);
+
+  const numCamas = Math.round(stored.base[3] || 0);
+  const tallosDia = Math.round(stored.base[11] || 0);
+  const tallosSemanaBase = Math.round(stored.base[10] || 0);
+
+  let totalC = 0;
+  let totalPE = 0;
+  let saldoAnterior = 0;
+  let metaSemanaAcumulada = 0;   // 🔥 NUEVO
+
+// ================= CÁLCULO DIARIO =================
+for(let d = 0; d < dias.length; d++){
+
+  const day = stored.days[d];
+  const cosecha = Math.round(day.cosecha || 0);
+  const pinchEj = esFinDeSemana(dias[d]) ? 0 : Math.round(day.pinchEj || 0);
+  if(esFinDeSemana(dias[d])) day.pinchEj = 0;
+
+  // 🔥 META AJUSTADA SEGÚN SALDO PENDIENTE
+  const metaDia = tallosDia - saldoAnterior;
+  metaSemanaAcumulada += metaDia;   // 🔥 ACUMULAR META REAL
+
+  let pinchCama = (metaDia - cosecha) / numCamas;
+  let pinchDia = pinchCama * numCamas;
+
+  let cumplimiento = metaDia
+    ? ((cosecha + pinchEj) / metaDia) * 100
+    : 0;
+
+  // 🔥 NUEVO SALDO CORRECTO
+  const saldo = (cosecha + pinchEj) - metaDia;
+
+  day.pinchCama = Math.round(isFinite(pinchCama) ? pinchCama : 0);
+  day.pinchDia = Math.round(isFinite(pinchDia) ? pinchDia : 0);
+  day.cum = Math.round(isFinite(cumplimiento) ? cumplimiento : 0);
+  day.saldo = saldo;
+
+  totalC += cosecha;
+  totalPE += pinchEj;
+
+  // 🔥 Se arrastra solo si queda pendiente
+  saldoAnterior = saldo;
+
+
+
+    // ================= PINTAR CUMPLIMIENTO DIARIO =================
+if(tr){
+
+  // 🔥 UBICAR CELDAS POR CLASE (ESTABLE)
+  const tdPC = tr.querySelectorAll('.pinch-cama')[d];
+  const tdPD = tr.querySelectorAll('.pinch-dia')[d];
+  const tdCum = tr.querySelectorAll('.cum-cell')[d];
+
+  if(tdPC) tdPC.textContent = day.pinchCama;
+  if(tdPD) tdPD.textContent = day.pinchDia;
+
+  if(tdCum){
+    tdCum.textContent = day.cum + ' %';
+    tdCum.classList.remove('cum-green','cum-yellow','cum-red');
+
+    if(day.cum >= 93 && day.cum <= 107){
+      tdCum.classList.add('cum-green');
+    }
+    else if(
+      (day.cum >= 90 && day.cum <= 92) ||
+      (day.cum >= 108 && day.cum <= 110)
+    ){
+      tdCum.classList.add('cum-yellow');
+    }
+    else{
+      tdCum.classList.add('cum-red');
+    }
+  }
+}
+  }
+
+  // ================= TOTALES SEMANA =================
+const totalProd = totalC + totalPE;
+
+// Diferencia contra Tallos/Sem
+const diferencia = totalProd - tallosSemanaBase;
+
+const cumpleSem = tallosSemanaBase
+  ? Math.round((totalProd / tallosSemanaBase) * 100)
+  : 0;
+
+  stored.totals = {
+    totalC,
+    totalPE,
+    totalProd,
+    cumpleSem,
+    diff: diferencia,
+    ajusteRecibido: stored.totals?.ajusteRecibido || 0
+  };
+
+  // ================= AJUSTE RECIBO (SEMANA SIGUIENTE) =================
+  const nextWeekNum = Number(semana) + 1;
+
+  if(nextWeekNum <= 52){
+    const nextWeek = String(nextWeekNum);
+    ensureWeekInitialized(nextWeek);
+
+    if(weekData[nextWeek][rowId]){
+      weekData[nextWeek][rowId].totals =
+        weekData[nextWeek][rowId].totals || {};
+
+      if(diferencia < 0){
+        weekData[nextWeek][rowId].totals.ajusteRecibido =
+          Math.abs(diferencia);
+      }else{
+        weekData[nextWeek][rowId].totals.ajusteRecibido = 0;
+      }
+// 🔥 Si estoy viendo la siguiente semana, refrescar tabla
+if(document.getElementById('semana').value === nextWeek){
+  renderTable();
+}
+    }
+  }
+
+  // ================= PINTAR TOTALES =================
+  if(tr){
+    tr.querySelector('.total-cosecha').textContent = totalC;
+    tr.querySelector('.total-pe').textContent = totalPE;
+    tr.querySelector('.total-prod').textContent = totalProd;
+    tr.querySelector('.diff').textContent = diferencia;
+
+    const tdAjuste = tr.querySelector('.ajuste-recibido');
+    if(tdAjuste){
+      tdAjuste.textContent = Math.round(stored.totals?.ajusteRecibido || 0);
+    }
+
+    const tdCumSem = tr.querySelector('.cum-sem');
+    tdCumSem.textContent = cumpleSem + ' %';
+    tdCumSem.classList.remove('cum-green','cum-yellow','cum-red');
+
+    if(cumpleSem >= 93 && cumpleSem <= 107){
+      tdCumSem.classList.add('cum-green');
+    }
+    else if(
+      (cumpleSem >= 90 && cumpleSem <= 92) ||
+      (cumpleSem >= 108 && cumpleSem <= 110)
+    ){
+      tdCumSem.classList.add('cum-yellow');
+    }
+    else{
+      tdCumSem.classList.add('cum-red');
+    }
+  }
+
+if(saveAfter){
+    saveToStorage();
+  }
+}
+
+/* ---------- recalc totals (TOTAL GENERAL) ---------- */
+function recalcTotals(semana){
+  const tfoot = document.getElementById('tfoot');
+  tfoot.innerHTML = '';
+  if(!weekData[semana]) return;
+
+  const weekObj = weekData[semana];
+  const supFilter = document.getElementById('supervisor').value.trim();
+  const semanaActual = Number(semana || 1);
+  const mostrarSemanaAnterior = semanaActual > 1;
+
+  const rows = Object.values(weekObj).filter(r => {
+    if(!r || !r.base) return false;
+    const sup = r.base[0] || '';
+    return !supFilter || supFilter === sup;
+  });
+
+  const tr = document.createElement('tr');
+
+  const tdLabel = document.createElement('td');
+  tdLabel.textContent = 'TOTAL GENERAL';
+  tdLabel.colSpan = modoCampo ? 6 : 13;
+  tdLabel.className = 'total-cell';
+  tr.appendChild(tdLabel);
+
+  if(mostrarSemanaAnterior){
+    const totalAjuste = rows.reduce((acc,r)=> acc + (Number(r.totals?.ajusteRecibido) || 0), 0);
+    const totalSabadoAnt = rows.reduce((acc,r)=> acc + (Number(r.pinchSabadoAnt) || 0), 0);
+    const totalDomingoAnt = rows.reduce((acc,r)=> acc + (Number(r.pinchDomingoAnt) || 0), 0);
+
+    [totalAjuste, totalSabadoAnt, totalDomingoAnt].forEach(valor => {
+      const td = document.createElement('td');
+      td.textContent = Math.round(valor);
+      td.className = 'total-cell';
+      tr.appendChild(td);
+    });
+  }
+
+  if(detallesVisible){
+    for(let d=0; d<dias.length; d++){
+      let sumaC = 0;
+      let sumaPE = 0;
+      let sumCum = 0;
+      let countCum = 0;
+
+      rows.forEach(r => {
+        sumaC += Number(r.days[d]?.cosecha) || 0;
+        if(!esFinDeSemana(dias[d])) sumaPE += Number(r.days[d]?.pinchEj) || 0;
+        const cum = Number(r.days[d]?.cum);
+        if(isFinite(cum)) { sumCum += cum; countCum++; }
+      });
+
+      const avgCumDay = countCum ? Math.round(sumCum / countCum) : 0;
+
+      const tdC = document.createElement('td');
+      tdC.textContent = sumaC;
+      tdC.className = 'total-cell';
+      tr.appendChild(tdC);
+
+      const tdPC = document.createElement('td');
+      tdPC.className = 'total-cell';
+      tr.appendChild(tdPC);
+
+      const tdPD = document.createElement('td');
+      tdPD.className = 'total-cell';
+      tr.appendChild(tdPD);
+
+      if(!esFinDeSemana(dias[d])){
+        const tdPE = document.createElement('td');
+        tdPE.textContent = sumaPE;
+        tdPE.className = 'total-cell';
+        tr.appendChild(tdPE);
+      }
+
+      const tdCum = document.createElement('td');
+      tdCum.textContent = avgCumDay + ' %';
+      tdCum.className = 'total-cell';
+      aplicarColorCum(tdCum, avgCumDay);
+      tr.appendChild(tdCum);
+    }
+  }
+
+  const totalCosechaSemana = rows.reduce((acc,r)=> acc + (Number(r.totals?.totalC) || 0), 0);
+  const totalPinchSemana = rows.reduce((acc,r)=> acc + (Number(r.totals?.totalPE) || 0), 0);
+  const totalProd = totalCosechaSemana + totalPinchSemana;
+  const totalMeta = rows.reduce((acc,r)=> acc + (Number(r.base?.[10]) || 0), 0);
+  const cumpleGlobal = totalMeta ? Math.round((totalProd / totalMeta) * 100) : 0;
+  const diffGlobal = rows.reduce((acc,r)=> acc + (Number(r.totals?.diff) || 0), 0);
+
+  const tdTotC = document.createElement('td');
+  tdTotC.textContent = totalCosechaSemana;
+  tdTotC.className='total-cell';
+  tr.appendChild(tdTotC);
+
+  const tdTotPE = document.createElement('td');
+  tdTotPE.textContent = totalPinchSemana;
+  tdTotPE.className='total-cell';
+  tr.appendChild(tdTotPE);
+
+  const tdTotProd = document.createElement('td');
+  tdTotProd.textContent = totalProd;
+  tdTotProd.className='total-cell';
+  tr.appendChild(tdTotProd);
+
+  const tdCumGlobal = document.createElement('td');
+  tdCumGlobal.textContent = cumpleGlobal + ' %';
+  tdCumGlobal.className='total-cell';
+  aplicarColorCum(tdCumGlobal, cumpleGlobal);
+  tr.appendChild(tdCumGlobal);
+
+  const tdDiffGlobal = document.createElement('td');
+  tdDiffGlobal.textContent = Math.round(diffGlobal);
+  tdDiffGlobal.className='total-cell';
+  tr.appendChild(tdDiffGlobal);
+
+  tfoot.appendChild(tr);
+}
+
+/* ---------- color en cumplimiento ---------- */
+function aplicarColorCum(td, val){
+  td.classList.remove('cum-green','cum-yellow','cum-red');
+  if(val >= 93 && val <= 107) td.classList.add('cum-green');
+  else if((val >= 90 && val <= 92) || (val >= 108 && val <= 110)) td.classList.add('cum-yellow');
+  else td.classList.add('cum-red');
+}
+
+/* ---------- export semana seleccionada a xlsx ---------- */
+function exportWeekXLSX(semana){
+  if(!semana) return alert('Selecciona una semana');
+  ensureWeekInitialized(semana);
+  const ws_data = [];
+  const header = ['Supervisor','Bloque','Variedad','N° Camas','Planta','Índice Exp','% Ciego','% Nacional','Ind Poda','Tallos/Mes','Tallos/Sem.','Tallos/Día','Tallos/Cama'];
+  dias.forEach(d => subcolumnasDia(d).forEach(c => header.push(`${d} ${c}`)));
+  header.push('TOTAL COSECHA','TOTAL PINCH EJECUTADO','TOTAL COSECHA + PINCH','CUMPLIMIENTO %','DIFERENCIA','AJUSTE RECIBIDO (T/S)');
+  ws_data.push(header);
+
+  const weekObj = weekData[semana];
+  datosBase.forEach((baseFila, idx) => {
+    const rowId = `${baseFila[0]}|${baseFila[1]}|${baseFila[2]}|${idx}`;
+    const stored = weekObj[rowId];
+    if(!stored) return;
+    const row = [...stored.base];
+    for(let d=0; d<dias.length; d++){
+      const day = stored.days[d] || {};
+      row.push(Math.round(day.cosecha||0), Math.round(day.pinchCama||0), Math.round(day.pinchDia||0));
+      if(!esFinDeSemana(dias[d])) row.push(Math.round(day.pinchEj||0));
+      row.push(Math.round(day.cum||0));
+    }
+// ===== ASEGURAR CUMPLIMIENTO SEMANAL =====
+stored.totals = stored.totals || {};
+
+const TS = Number(stored.base[10]) || 0; // Tallos/Semana
+const totalProdCalc =
+  (Number(stored.totals.totalC) || 0) +
+  (Number(stored.totals.totalPE) || 0);
+
+stored.totals.totalProd = totalProdCalc;
+
+stored.totals.cumpleSem = TS > 0
+  ? Math.round((totalProdCalc / TS) * 100)
+  : 0;
+    const t = stored.totals || { totalC:0, totalPE:0, totalProd:0, cumpleSem:0, diff:0, ajusteRecibido:0 };
+    row.push(Math.round(t.totalC||0), Math.round(t.totalPE||0), Math.round(t.totalProd||0), Math.round(t.cumpleSem||0), Math.round(t.diff||0), Math.round(t.ajusteRecibido||0));
+    ws_data.push(row);
+  });
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(ws_data);
+  ws['!autofilter'] = { ref: XLSX.utils.encode_range({s:{r:0,c:0}, e:{r:ws_data.length-1,c:ws_data[0].length-1}}) };
+  ws['!cols'] = ws_data[0].map((_,i)=>({wch: i<3 ? 16 : i<13 ? 12 : 14}));
+  XLSX.utils.book_append_sheet(wb, ws, `Semana-${semana}`);
+  XLSX.writeFile(wb, `Planificacion_Pinch_Semana_${semana}.xlsx`);
+}
+
+/* ---------- export todas las semanas en una sola hoja ---------- */
+function exportAllWeeksXLSX(){
+  const wb = XLSX.utils.book_new();
+  const ws_data = [];
+  const header = ['Semana','Supervisor','Bloque','Variedad','N° Camas','Planta','Índice Exp','% Ciego','% Nacional','Ind Poda','Tallos/Mes','Tallos/Sem.','Tallos/Día','Tallos/Cama','AJUSTE RECIBIDO (S/D)','Pinch Sábado','Pinch Domingo'];
+  dias.forEach(d => subcolumnasDia(d).forEach(c => header.push(`${d} ${c}`)));
+  header.push('TOTAL COSECHA','TOTAL PINCH EJECUTADO','TOTAL COSECHA + PINCH','CUMPLIMIENTO %','DIFERENCIA');
+  ws_data.push(header);
+
+  for(let w=1; w<=52; w++){
+    const sem = String(w);
+    ensureWeekInitialized(sem);
+    // ensure base indices correct
+    Object.keys(weekData[sem]).forEach(rid => {
+      const r = weekData[sem][rid];
+      if(r && r.base) calcularIndicesParaBase(r.base);
+    });
+
+    datosBase.forEach((baseFila, idx) => {
+      const rowId = `${baseFila[0]}|${baseFila[1]}|${baseFila[2]}|${idx}`;
+      const stored = weekData[sem][rowId];
+      if(!stored) return;
+      const row = [sem, ...stored.base];
+      const ajuste = stored.totals?.ajusteRecibido || 0;
+      row.push(
+        Math.round(ajuste),
+        Math.round(stored.pinchSabadoAnt || 0),
+        Math.round(stored.pinchDomingoAnt || 0)
+      );
+      for(let d=0; d<dias.length; d++){
+        const day = stored.days[d] || {};
+        row.push(Math.round(day.cosecha||0), Math.round(day.pinchCama||0), Math.round(day.pinchDia||0), Math.round(day.pinchEj||0), Math.round(day.cum||0));
+      }
+// ===== ASEGURAR CUMPLIMIENTO SEMANAL =====
+stored.totals = stored.totals || {};
+
+const TS = Number(stored.base[10]) || 0; // Tallos/Semana
+const totalProdCalc =
+  (Number(stored.totals.totalC) || 0) +
+  (Number(stored.totals.totalPE) || 0);
+
+stored.totals.totalProd = totalProdCalc;
+
+stored.totals.cumpleSem = TS > 0
+  ? Math.round((totalProdCalc / TS) * 100)
+  : 0;
+      const t = stored.totals || { totalC:0, totalPE:0, totalProd:0, cumpleSem:0, diff:0 };
+      row.push(Math.round(t.totalC||0), Math.round(t.totalPE||0), Math.round(t.totalProd||0), Math.round(t.cumpleSem||0), Math.round(t.diff||0));
+      ws_data.push(row);
+    });
+  }
+
+  const ws = XLSX.utils.aoa_to_sheet(ws_data);
+  ws['!autofilter'] = { ref: XLSX.utils.encode_range({s:{r:0,c:0}, e:{r:ws_data.length-1,c:ws_data[0].length-1}}) };
+  ws['!cols'] = ws_data[0].map((_,i)=>({wch: i<4 ? 16 : i<14 ? 12 : 14}));
+  XLSX.utils.book_append_sheet(wb, ws, 'Produccion_52_Semanas');
+  XLSX.writeFile(wb, 'Planificacion_Pinch_52_Semanas.xlsx');
+}
+
+
+function resetLocalData(keepApi = true){
+  const savedApi = keepApi ? (localStorage.getItem(API_STORAGE_KEY) || '') : '';
+
+  datosBase = [];
+  weekData = {_propagations:{}};
+  editMode = false;
+
+  try{
+    localStorage.removeItem(STORAGE_KEY);
+    if(!keepApi){
+      localStorage.removeItem(API_STORAGE_KEY);
+    } else {
+      localStorage.setItem(API_STORAGE_KEY, savedApi);
+    }
+  }catch(e){
+    console.warn(e);
+  }
+
+  const tbody = document.getElementById('tbody');
+  const tfoot = document.getElementById('tfoot');
+  if(tbody) tbody.innerHTML = '';
+  if(tfoot) tfoot.innerHTML = '';
+
+  llenarSupervisores();
+}
+
+async function borrarSemanaEnGoogleSheets(semana){
+  if(!API_URL) return {status:'skip'};
+
+  const res = await fetch(API_URL, {
+    method:'POST',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body: JSON.stringify({ action:'clear_week', semana:Number(semana) })
+  });
+
+  try{
+    return await res.json();
+  }catch(e){
+    return {status:'ok'};
+  }
+}
+
+/* ---------- botones: editar, ver detalles, borrar semana, reset ---------- */
+/* ---------- botones ---------- */
+document.getElementById('habilitarCosecha').addEventListener('click', ()=>{
+  editMode = !editMode;
+  document.getElementById('habilitarCosecha').textContent = editMode ? 'Deshabilitar edición' : 'Habilitar edición';
+  document.querySelectorAll('#tbody input').forEach(i => i.disabled = !editMode);
+});
+
+document.getElementById('btnGuardar').addEventListener('click', async ()=>{ saveToStorage(); await guardarSemanaEnGoogleSheets(); alert('Semana enviada correctamente a Google Sheets'); });
+document.getElementById('btnResyncSemana').addEventListener('click', async ()=>{ const sem = document.getElementById('semana').value || '1'; if(!confirm(`Se volverá a sincronizar la semana ${sem} con Google Sheets. ¿Continuar?`)) return; await resincronizarSemanas(sem, sem); });
+document.getElementById('btnResyncRango').addEventListener('click', async ()=>{ const actual = Number(document.getElementById('semana').value || 1); const desde = Number(prompt('Resincronizar desde semana:', String(actual)) || actual); const hasta = Number(prompt('Resincronizar hasta semana:', String(actual)) || actual); if(!desde || !hasta) return; if(!confirm(`Se resincronizarán las semanas ${Math.min(desde,hasta)} a ${Math.max(desde,hasta)}. ¿Continuar?`)) return; await resincronizarSemanas(desde, hasta); });
+document.getElementById('btnExportSemana').addEventListener('click', ()=>{ const s = document.getElementById('semana').value; exportWeekXLSX(s); });
+document.getElementById('btnBorrarSemana').addEventListener('click', async ()=>{
+  const sem = document.getElementById('semana').value;
+  if(!sem) return alert('Selecciona semana');
+
+  if(!confirm(`Eliminar datos de la semana ${sem}?`)) return;
+
+  delete weekData[sem];
+  if(weekData._propagations && weekData._propagations[sem]) {
+    delete weekData._propagations[sem];
+  }
+
+  await borrarSemanaEnGoogleSheets(sem);
+
+  ensureWeekInitialized(sem);
+  renderTable();
+  saveToStorage();
+  showUpdateMessage(`🗑️ Semana ${sem} eliminada correctamente`, 'warning');
+});
+
+document.getElementById('btnResetTodo').addEventListener('click', async ()=>{
+  const sem = document.getElementById('semana').value || '1';
+
+  if(!confirm('Esto limpiará la memoria local del navegador y volverá a cargar la información. ¿Deseas continuar?')) return;
+
+  resetLocalData(true);
+
+  if(API_URL){
+    await cargarDesdeGoogleSheets({
+      origen: 'reset',
+      mostrarMensaje: false,
+      limpiarDesdeSemana: true
+    });
+  }
+
+  buildHeader();
+  renderTable();
+  showUpdateMessage('♻️ Datos reseteados correctamente. Se recargó información limpia.', 'info');
+});
+
+
+/* ---------- inicialización al cargar la página ---------- */
+function init(){
+  modoCampo = true;
+  document.body.classList.add('mode-campo');
+
+  const semSel = document.getElementById('semana');
+
+  for(let i=1;i<=52;i++){
+    const opt=document.createElement('option');
+    opt.value=String(i);
+    opt.textContent=`Semana ${i}`;
+    semSel.appendChild(opt);
+  }
+
+  semSel.value = '1';
+
+  const apiEl = document.getElementById('apiUrl');
+  if(apiEl) apiEl.value = API_URL || '';
+  loadFromStorage();
+
+  if(datosBase.length>0){
+    llenarSupervisores();
+    for(let w=1; w<=52; w++) ensureWeekInitialized(String(w));
+    aplicarCalculosTodasSemanas();
+  }
+
+  buildHeader();
+  setupTbodyEvents();
+  renderTable();
+
+  if(API_URL){
+    cargarDesdeGoogleSheets({
+      origen: 'init',
+      mostrarMensaje: false,
+      limpiarDesdeSemana: true
+    }).then(()=>{
+      buildHeader();
+      renderTable();
+    }).catch(err => console.warn(err));
+  }
+
+  // eventos
+  semSel.addEventListener('change', async ()=>{
+    await cargarDesdeGoogleSheets({
+      origen: 'semana',
+      mostrarMensaje: true,
+      limpiarDesdeSemana: true
+    });
+    buildHeader();
+    renderTable();
+  });
+  document.getElementById('supervisor').addEventListener('change', renderTable);
+  const btnAct = document.getElementById('btnActualizar');
+  if(btnAct){
+    btnAct.addEventListener('click', async ()=>{
+      await cargarDesdeGoogleSheets({
+        origen: 'manual',
+        mostrarMensaje: true,
+        limpiarDesdeSemana: true
+      });
+      buildHeader();
+      renderTable();
+    });
+  }
+
+}
+
+
+/* ---------- botón detalles ---------- */
+function toggleDetalles(){ return;
+
+  modoCampo = !modoCampo;
+  document.body.classList.toggle('mode-campo', modoCampo);
+
+  const btn = document.getElementById("btnToggleDetalles");
+  const chip = document.getElementById("modeChip");
+
+  if(btn){
+    btn.textContent = modoCampo
+      ? "🧪 Ver Modo Técnico"
+      : "🌿 Volver a Modo Campo";
+  }
+
+  if(chip){
+    chip.textContent = modoCampo
+      ? "🌿 Modo Campo"
+      : "🧪 Modo Técnico";
+  }
+
+  renderTable();
+}
+
+
+/* ---------- cargar al iniciar ---------- */
+document.addEventListener('DOMContentLoaded', init);
+</script>
+
+
+<script>
+(function(){
+  const cfg = window.SYSTEM_PINCH_CONFIG || {};
+  const api = cfg.API_URL || '';
+  window.__PINCH_API__ = api;
+  document.addEventListener('DOMContentLoaded', function(){
+    const input = document.getElementById('apiUrl');
+    if(input){
+      if(api && api !== 'PEGUE_AQUI_SU_URL_DE_APPS_SCRIPT') input.value = api;
+      input.readOnly = true;
+      input.placeholder = api && api !== 'PEGUE_AQUI_SU_URL_DE_APPS_SCRIPT' ? 'URL configurada automáticamente' : 'Configure la URL en config_sistema_pinch.js';
+      input.title = 'La URL se configura una sola vez en config_sistema_pinch.js';
+    }
+    const note = document.getElementById('mobileConfigNote');
+    if(note){
+      note.innerHTML = (api && api !== 'PEGUE_AQUI_SU_URL_DE_APPS_SCRIPT')
+        ? '<strong>Conexión central activa.</strong> La URL de Google Sheets ya está configurada para este sistema y se carga automáticamente.'
+        : '<strong>Falta configurar la URL.</strong> Abra <code>config_sistema_pinch.js</code> y pegue su URL de Apps Script una sola vez.';
+    }
+  });
+})();
+</script>
+
+<nav class="sp-bottom-nav" aria-label="Navegación principal">
+  <a href="./index.html"><span class="ico">⌂</span><span>Inicio</span></a>
+  <a href="./modulo_campo_mobile.html" class="active"><span class="ico">🌿</span><span>Campo</span></a>
+  <a href="./modulo_tecnico_mobile.html"><span class="ico">📊</span><span>Técnico</span></a>
+</nav>
+
+</body>
+</html>
+<!-- Navegación Sanitario agregada -->

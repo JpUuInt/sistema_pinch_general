@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Módulo Pinch Sanitario</title>
+<link rel="manifest" href="manifest.json">
+<script src="config_sistema_pinch.js"></script>
+
+<style>
+:root{
+ --primary:#0f2a44;
+ --secondary:#1f4e78;
+ --accent:#16a34a;
+ --bg:#eef4f8;
+ --card:#ffffff;
+ --border:#d7e3ef;
+ --text:#173246;
+}
+*{box-sizing:border-box}
+body{
+ margin:0;
+ font-family:Inter,Arial,sans-serif;
+ background:linear-gradient(180deg,#f8fbff,var(--bg));
+ color:var(--text);
+ padding-bottom:100px;
+}
+header{
+ background:linear-gradient(135deg,var(--primary),var(--secondary));
+ color:white;
+ padding:22px;
+ border-radius:0 0 28px 28px;
+ box-shadow:0 10px 24px rgba(0,0,0,.12);
+}
+header h1{
+ margin:0;
+ font-size:28px;
+ display:flex;
+ align-items:center;
+ gap:12px;
+}
+header p{
+ margin-top:8px;
+ opacity:.9;
+}
+.container{
+ max-width:1400px;
+ margin:auto;
+ padding:18px;
+}
+.card{
+ background:var(--card);
+ border-radius:24px;
+ padding:20px;
+ box-shadow:0 8px 22px rgba(0,0,0,.06);
+ border:1px solid var(--border);
+}
+.filters{
+ display:grid;
+ grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+ gap:16px;
+ margin-bottom:20px;
+}
+label{
+ font-size:13px;
+ font-weight:700;
+ display:block;
+ margin-bottom:6px;
+}
+select,input{
+ width:100%;
+ padding:12px;
+ border-radius:14px;
+ border:1px solid var(--border);
+ font-size:14px;
+}
+button{
+ background:var(--accent);
+ color:white;
+ border:none;
+ border-radius:14px;
+ padding:12px 18px;
+ font-weight:700;
+ cursor:pointer;
+}
+button:hover{opacity:.92}
+.table-wrap{
+ overflow:auto;
+ margin-top:18px;
+}
+table{
+ width:100%;
+ border-collapse:collapse;
+ min-width:1100px;
+}
+thead{
+ background:linear-gradient(135deg,var(--primary),var(--secondary));
+ color:white;
+}
+th,td{
+ border:1px solid var(--border);
+ padding:10px;
+ text-align:center;
+}
+tbody tr:nth-child(even){
+ background:#f8fbff;
+}
+td input{
+ min-width:70px;
+ text-align:center;
+}
+.nav{
+ position:fixed;
+ left:50%;
+ transform:translateX(-50%);
+ bottom:12px;
+ background:var(--primary);
+ border-radius:28px;
+ width:min(92%,720px);
+ display:flex;
+ justify-content:space-around;
+ padding:10px;
+ box-shadow:0 12px 30px rgba(0,0,0,.25);
+}
+.nav a{
+ color:white;
+ text-decoration:none;
+ text-align:center;
+ font-size:13px;
+ font-weight:700;
+ opacity:.85;
+}
+.nav a.active{
+ background:white;
+ color:var(--primary);
+ padding:10px 18px;
+ border-radius:18px;
+ opacity:1;
+}
+.status{
+ margin-top:14px;
+ font-weight:700;
+ color:#166534;
+}
+</style>
+</head>
+<body>
+
+<header>
+ <h1>🩺 Módulo Pinch Sanitario</h1>
+ <p>Control semanal de pinch sanitario por supervisor, bloque y variedad.</p>
+</header>
+
+<div class="container">
+ <div class="card">
+
+  <div class="filters">
+   <div>
+    <label>Supervisor</label>
+    <select id="supervisor"></select>
+   </div>
+
+   <div>
+    <label>Semana</label>
+    <input type="number" id="semana" min="1" max="53" value="1">
+   </div>
+
+   <div style="display:flex;align-items:end">
+    <button onclick="cargarTabla()">Cargar información</button>
+   </div>
+  </div>
+
+  <div class="table-wrap">
+   <table id="tabla">
+    <thead>
+      <tr>
+        <th>Supervisor</th>
+        <th>Bloque</th>
+        <th>Variedad</th>
+        <th>Lunes</th>
+        <th>Martes</th>
+        <th>Miércoles</th>
+        <th>Jueves</th>
+        <th>Viernes</th>
+        <th>Total</th>
+        <th>Motivo</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+   </table>
+  </div>
+
+  <div style="margin-top:18px">
+    <button onclick="guardar()">Guardar en Google Sheets</button>
+  </div>
+
+  <div class="status" id="estado"></div>
+
+ </div>
+</div>
+
+<nav class="nav">
+ <a href="./index.html">🏠<br>Inicio</a>
+ <a href="./modulo_campo_mobile.html">🌿<br>Campo</a>
+ <a href="./modulo_tecnico_mobile.html">📊<br>Técnico</a>
+ <a href="./modulo_pinch_sanitario.html" class="active">🩺<br>Sanitario</a>
+</nav>
+
+<script>
+const API_URL = window.SYSTEM_PINCH_CONFIG.API_URL;
+let baseData = [];
+
+async function cargarSupervisores(){
+  const r = await fetch(API_URL + '?action=base');
+  const data = await r.json();
+  baseData = data || [];
+
+  const supervisors = [...new Set(baseData.map(x => x.Supervisor).filter(Boolean))];
+
+  const sel = document.getElementById('supervisor');
+  sel.innerHTML = supervisors.map(s => `<option>${s}</option>`).join('');
+}
+
+function crearInput(value=''){
+  return `<input value="${value}" type="number" min="0" oninput="calcularTotal(this)">`;
+}
+
+function cargarTabla(){
+  const supervisor = document.getElementById('supervisor').value;
+  const tbody = document.querySelector('#tabla tbody');
+
+  const rows = baseData.filter(r => r.Supervisor == supervisor);
+
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td>${r.Supervisor}</td>
+      <td>${r.Bloque}</td>
+      <td>${r.Variedad}</td>
+      <td>${crearInput()}</td>
+      <td>${crearInput()}</td>
+      <td>${crearInput()}</td>
+      <td>${crearInput()}</td>
+      <td>${crearInput()}</td>
+      <td class="total">0</td>
+      <td><input type="text" placeholder="Motivo"></td>
+    </tr>
+  `).join('');
+}
+
+function calcularTotal(el){
+  const tr = el.closest('tr');
+  const nums = [...tr.querySelectorAll('td input[type=number]')]
+    .map(i => Number(i.value || 0));
+
+  const total = nums.reduce((a,b)=>a+b,0);
+  tr.querySelector('.total').innerText = total;
+}
+
+async function guardar(){
+
+  const semana = document.getElementById('semana').value;
+
+  const filas = [...document.querySelectorAll('#tabla tbody tr')].map(tr => {
+
+    const nums = tr.querySelectorAll('input[type=number]');
+    const motivo = tr.querySelector('input[type=text]').value;
+
+    return {
+      Supervisor: tr.children[0].innerText,
+      Bloque: tr.children[1].innerText,
+      Variedad: tr.children[2].innerText,
+      Semana: semana,
+      Lunes: nums[0].value,
+      Martes: nums[1].value,
+      Miercoles: nums[2].value,
+      Jueves: nums[3].value,
+      Viernes: nums[4].value,
+      Total: tr.querySelector('.total').innerText,
+      Motivo: motivo
+    };
+  });
+
+  const r = await fetch(API_URL,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      action:'guardar_pinch_sanitario',
+      rows:filas
+    })
+  });
+
+  const data = await r.json();
+
+  document.getElementById('estado').innerText =
+    data.ok ? 'Información guardada correctamente' : 'Error al guardar';
+}
+
+cargarSupervisores();
+</script>
+
+</body>
+</html>
